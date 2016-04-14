@@ -5,7 +5,7 @@
 # 主机配置
 
 | 主机名      | IP          | Role                 |
-| ----------- |:-----------:| -------------------: |
+| ----------- |:-----------:| :------------------: |
 | admin       | 10.0.2.6    | namenode             |
 | mon1        | 10.0.2.3    | resourcemanager      |
 | osd1        | 10.0.2.4    | datanode/nodemanager |
@@ -34,6 +34,7 @@ core-site.xml 有个默认设置可以参考官方文档[链接](http://hadoop.a
 core-site.xml位于${HADOOP_HOME}/etc/hadoop目录下
 
 ```xml
+<?xml version="1.0"?>
 <configuration>
     <property>
         <name>fs.defaultFS</name>
@@ -60,7 +61,7 @@ hdfs-site.xml 有个默认设置可以参考官方文档[链接](http://hadoop.a
 hdfs-site.xml位于${HADOOP_HOME}/etc/hadoop目录下
 
 ```xml
-
+<?xml version="1.0"?>
 <configuration>
     <!-- 设置数据备份 -->
     <property>
@@ -92,7 +93,7 @@ hdfs-site.xml位于${HADOOP_HOME}/etc/hadoop目录下
 mapred-site.xml 有个默认设置可以参考官方文档[链接](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/ClusterSetup.html)  
 mapred-site.xml位于${HADOOP_HOME}/etc/hadoop目录下
 ```xml
-
+<?xml version="1.0"?>
 <configuration>
     <!-- 注意通常情况下这个配置的值都设置为 Yarn，如果没有配置这项，那么提交的 Yarn job 只会运行在local模式，而不是分布式模式 -->
     <property>
@@ -108,6 +109,7 @@ yarn-site.xml 有个默认设置可以参考官方文档[链接](http://hadoop.a
 yarn-site.xml位于${HADOOP_HOME}/etc/hadoop目录下
 
 ```xml
+<?xml version="1.0"?>
 <configuration>
 
     <!-- The address of the applications manager interface in the RM. -->
@@ -147,3 +149,71 @@ yarn-site.xml位于${HADOOP_HOME}/etc/hadoop目录下
 
 </configuration>
 ```
+
+# 启动HADOOP
+
+## boot up HDFS
+```sh
+# The first time you bring up HDFS, it must be formatted
+# running on namenode
+bin/hdfs namenode -format
+
+# running on namenode
+sbin/hadoop-daemon.sh start namenode
+
+# running on datanodes
+sbin/hadoop-daemon.sh start datanode
+
+# Alternatively, 如果你设置了etc/hadoop/slaves 所有的hdfs processes can be bootup use the script
+# 这个script会启动namenode和datanodes 它会从namenode上ssh到datanode启动datanode
+# 如果需要修改默认ssh配置 需要设置HADOOP_SSH_OPTS环境变量 如: export HADOOP_SSH_OPTS="-p 16688"通过16688端口instead of端口22
+sbin/start-dfs.sh
+
+```
+
+## boot up yarn
+
+```sh
+# running on resourcemanager
+sbin/yarn-daemon.sh start resourcemanager
+
+# running on nodemanager
+sbin/yarn-daemon.sh start nodemanager
+
+# Alternatively, 如果你设置了etc/hadoop/slaves 所有的yarn processes can be bootup use the script
+# 这个script会启动resourcemanager和nodemanager 它会从resourcemanager上ssh到nodemanager启动nodemanager
+# 如果需要修改默认ssh配置 需要设置HADOOP_SSH_OPTS环境变量 如: export HADOOP_SSH_OPTS="-p 16688"通过16688端口instead of端口22
+sbin/start-yarn.sh
+```
+
+# HADOOP shutdown 过程与启动差不多
+## shutdown HDFS
+```sh
+# running on namenode
+sbin/hadoop-daemon.sh start namenode
+
+# running on datanodes
+sbin/hadoop-daemon.sh start datanode
+
+
+# Alternatively, 如果你设置了etc/hadoop/slaves 所有的hdfs processes can be bootup use the script
+# 这个script会启动namenode和datanodes 它会从namenode上ssh到datanode启动datanode
+# 如果需要修改默认ssh配置 需要设置HADOOP_SSH_OPTS环境变量 如: export HADOOP_SSH_OPTS="-p 16688"通过16688端口instead of端口22
+sbin/stop-dfs.sh
+```
+
+## shutdown yarn
+```sh
+# running on resourcemanager
+sbin/yarn-daemon.sh stop resourcemanager
+
+# running on nodemanager
+sbin/yarn-daemon.sh stop nodemanager
+
+# Alternatively, 如果你设置了etc/hadoop/slaves 所有的yarn processes can be bootup use the script
+# 这个script会启动resourcemanager和nodemanager 它会从resourcemanager上ssh到nodemanager启动nodemanager
+# 如果需要修改默认ssh配置 需要设置HADOOP_SSH_OPTS环境变量 如: export HADOOP_SSH_OPTS="-p 16688"通过16688端口instead of端口22
+sbin/stop-yarn.sh
+```
+
+
